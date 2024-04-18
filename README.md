@@ -63,11 +63,15 @@ Create a new MAP-E interface, create a new interface and name it (e.g. _WAN6MAPE
     *   PSID offset: 4
     *   From advanced settings, make sure it has **WAN6 as Tunnel Link**, and check the box **Use legacy MAP**, and set the MTU to 1460
 
+![WANMAP](https://github.com/herrkartoffel/openwrt-jp-map-e-nuro/blob/main/wanmap.png?raw=true)
+
+![WANMAP-Advanced](https://github.com/herrkartoffel/openwrt-jp-map-e-nuro/blob/main/wanmap-advanced.png?raw=true)
+
 Note: Don't forget to add this _WAN6MAPE_ interface to same firewall zone as WAN/WAN6 since this is also part of WAN.
 
-## ADVANCED CUSTOM CONFIGURATION
+## PING/EXHAUSTED PORTS FIX
 
-MAP-E with IPv4 sharing from ISP is designed to share same IPv4 address with many customers, with different ports being assigned based on IETF rules, the above linked parameter calculator already shown the assigned ports, usually it's divided into groups of 16 ports, according to [this discussion](https://github.com/fakemanhk/openwrt-jp-ipoe/discussions/10) JPNE assigns 15 groups (240 ports), while OCN/plala assign 63 groups (1008 ports). In most cases this should be enough for most home uses (since only IPv4 connections will use them), however a recent test with well known IPv4 based [website](https://nichiban.co.jp) that uses many sessions showing a significant lagging while loading. After investigation the OpenWrt firewall statistics indicating only first group of assigned ports (i.e. only 16 ports) being used and this is the reason of lagging when a large number of simultaneous IPv4 sessions opening, also IPv4 PING is not working. Not sure if it's because Japan ISP MAP-E configuration has something MAP package can't deal with, as a result a system change is required for _**/lib/netifd/proto/map.sh.**_ Below is the diff of original vs new map.sh:
+MAP-E with IPv4 sharing from ISP is designed to share same IPv4 address with many customers, with different ports being assigned based on IETF rules, the above linked parameter calculator already shown the assigned ports, usually it's divided into groups of 16 ports, according to [this discussion](https://github.com/fakemanhk/openwrt-jp-ipoe/discussions/10) JPNE assigns 15 groups (240 ports), while NURO assign 63 groups (1008 ports). In most cases this should be enough for most home uses (since only IPv4 connections will use them), however a recent test with well known IPv4 based [website](https://nichiban.co.jp) that uses many sessions showing a significant lagging while loading. After investigation the OpenWrt firewall statistics indicating only first group of assigned ports (i.e. only 16 ports) being used and this is the reason of lagging when a large number of simultaneous IPv4 sessions opening, also IPv4 PING is not working. Not sure if it's because Japan ISP MAP-E configuration has something MAP package can't deal with, as a result a system change is required for _**/lib/netifd/proto/map.sh.**_ Below is the diff of original vs new map.sh:
 
 ```
 root@OpenWrt# diff -c map.sh.old map.sh.new
@@ -203,6 +207,10 @@ root@OpenWrt# diff -c map.sh.old map.sh.new
 You can also download the whole file [here](https://github.com/fakemanhk/openwrt-jp-ipoe/blob/main/map.sh.new), _**don't forget to turn on the execute bit (chmod +x)**_ of the file after replacement.
 
 After editing, please restart IPv6 interface, or simply reboot router, you'll see that IPv4 PING is working as well as observing more port groups passing traffic now.
+
+## Final result:
+
+![WAN](https://github.com/herrkartoffel/openwrt-jp-map-e-nuro/blob/main/wan.png?raw=true)
 
 
 ### Reference materials:
