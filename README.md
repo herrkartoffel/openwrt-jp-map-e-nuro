@@ -215,6 +215,10 @@ After editing, please restart IPv6 interface, or simply reboot router, you'll se
 
 ### Reference materials:
 
+Credits to [fakemanhk's guide](https://github.com/fakemanhk/openwrt-jp-ipoe) which helped with the ping/port issue.
+
 [https://github.com/site-u2023/config-software/blob/main/map-e-nuro.sh]
+
+[https://github.com/fakemanhk/openwrt-jp-ipoe]
 
 _First draft: 18 April 2024_
